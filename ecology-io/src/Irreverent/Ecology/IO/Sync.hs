@@ -370,7 +370,7 @@ createRepo apis ciApis customEnv templateHistory params templates p =
                 KeepTemplateHistory -> cloneTemplateWithHistory template
                 RemoveTemplateHistory -> cloneTemplateWithoutHistory fp template
               mapEitherT (withCwd (verifiedDirPath fp <> "/new-repo")) $ do
-                logText [text|Bootstrapping template $authedUrl ...|]
+                logText [text|Bootstrapping template authedUrl:"$authedUrl" ...|]
                 lift $ bootstrapTemplate customEnv p
                 logText [text|Setup initial CI repo config ...|]
                 changes <- mapEitherT lift . firstEitherT EcologySyncCIError $ initialCIInRepoConfig ciApi (verifiedDirPath fp <> "/new-repo") params newCIInfo
