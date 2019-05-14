@@ -14,22 +14,22 @@ module Irreverent.Ecology.API.Git (
   ) where
 
 import Irreverent.Ecology.Core.Data (GitRepository, NewGitRepository)
-
+import qualified Ultra.Data.Text as T
 import Ultra.Control.Monad.Trans.Either (EitherT, firstEitherT)
 
 import Preamble
 
-newtype GitPlatformAPIs g a b c m e = GitPlatformAPIs {
-    selectGitAPI :: g -> GitPlatformAPI a b c m e
+newtype GitPlatformAPIs g a b m e = GitPlatformAPIs {
+    selectGitAPI :: g -> GitPlatformAPI a b m e
   }
 
-data GitPlatformAPI a b c m e = GitPlatformAPI {
+data GitPlatformAPI a b m e = GitPlatformAPI {
     getOrgRepos   :: EitherT e m [GitRepository]
   , createNewRepo :: NewGitRepository a b -> EitherT e m GitRepository
-  , getAuth       :: c
+  , getAuth       :: T.Text
   }
 
-instance (Functor m) => Functor (GitPlatformAPI a b c m) where
+instance (Functor m) => Functor (GitPlatformAPI a b m) where
 --fmap :: (a -> b) -> f a -> f b
   fmap f (GitPlatformAPI gor cnr auth) =
     GitPlatformAPI (firstEitherT f gor) (firstEitherT f . cnr) auth
