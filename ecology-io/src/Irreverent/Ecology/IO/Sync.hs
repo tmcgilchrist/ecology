@@ -177,7 +177,7 @@ newprojects =
 
 createNewProject
   :: (MonadCatch m, MonadBracket m, MonadIO m)
-  => GitPlatformAPIs g a b m e
+  => GitPlatformAPIs g a b d m e
   -> CIAPIs a i m ce
   -> CustomHooks g i a b c m he
   -> (EcologyProject g i a b c -> ChildEnvironment)
@@ -313,8 +313,8 @@ bootstrapTemplate customEnv p =
     ]
 
 createRepo
-  :: forall a b c e g i ce he ie m. (MonadBracket m, MonadCatch m, MonadIO m)
-  => GitPlatformAPIs g a b m e
+  :: forall a b c d e g i ce he ie m. (MonadBracket m, MonadCatch m, MonadIO m)
+  => GitPlatformAPIs g a b d m e
   -> CIAPIs a i m ce
   -> (EcologyProject g i a b c -> ChildEnvironment)
   -> GitTemplateHistoryAction
@@ -324,7 +324,7 @@ createRepo
   -> EitherT (EcologySyncError e ce he ie) m GitRepository
 createRepo apis ciApis customEnv templateHistory params templates p =
   let
-    api :: GitPlatformAPI a b m e
+    api :: GitPlatformAPI a b d m e
     api = selectGitAPI apis $ ecologyProjectLocation p
 
     ciApi :: CIAPI a m ce
@@ -342,9 +342,12 @@ createRepo apis ciApis customEnv templateHistory params templates p =
                 (ecologyProjectType p)
                 (ciEnvironmentVars . ci $ p)
 
+              -- TODO want this to be for github personal token
+              -- git push -q https://${GITHUB_PERSONAL_TOKEN}@github.com/<user>/<repo>.git master
+
               pushNewRepoCommand :: ShellCommand
               pushNewRepoCommand =
-                gitCmd (RawArg <$> ["push", gitRepoGitUrl newRepo, "master"])
+                gitCmd (RawArg <$> ["push", gitRepoHtmlUrl newRepo, "master"])
 
               gitAddCommand :: ShellCommand
               gitAddCommand =
@@ -492,8 +495,8 @@ combineHashes params ciHashes =
         ciHashMap
 
 ecologySync
-  :: forall a b c e g i ce he ie m. (Ord g, MonadBracket m, MonadCatch m, MonadIO m)
-  => GitPlatformAPIs g a b m e
+  :: forall a b c d e g i ce he ie m. (Ord g, MonadBracket m, MonadCatch m, MonadIO m)
+  => GitPlatformAPIs g a b d m e
   -> CIAPIs a i m ce
   -> IMAPI m ie
   -> CustomHooks g i a b c m he
@@ -546,4 +549,3 @@ ecologySync gitAPIs ciAPIs imAPI hooks customEnv templateHistory ecologyBucket' 
     --firstEitherT EcologySyncGitError .
     --  forM_ (gitProjects v report) $ uncurry (updateRepo v)
     -- TODO: Do a pass and render the reports for new projects?
-

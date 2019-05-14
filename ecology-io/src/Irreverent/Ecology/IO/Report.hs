@@ -123,14 +123,14 @@ renderEcologyReportError _ (EcologyReportJsonError desc t) = T.concat ["Json Par
 renderEcologyReportError _ (EcologyReportHttpError e)     = T.concat ["HTTP Error: ", e]
 
 fetchOrgRepos
-  :: forall a b g m e. (Monad m)
-  => GitPlatformAPIs g a b m e
+  :: forall a b d g m e. (Monad m)
+  => GitPlatformAPIs g a b d m e
   -> [g]
   -> EitherT (EcologyReportError e) m [(g, NonEmpty GitRepository)]
 fetchOrgRepos apis platforms =
   fmap (filteredBy (traverse nonEmpty)) . forM platforms $ \platform ->
     let
-      api :: GitPlatformAPI a b m e
+      api :: GitPlatformAPI a b d m e
       api = selectGitAPI apis platform
     in bimapEitherT EcologyReportGitError ((,) platform) $ getOrgRepos api
 
@@ -259,9 +259,9 @@ envChange (H.HashMapKeyDelete varName)  =
   EcologyEnvironmentVariableDelete . EnvironmentVariableName $ varName
 
 getEcologyReport
-  :: forall a b c e g i m. (Monad m, MonadCatch m, MonadIO m, Ord g)
+  :: forall a b c d e g i m. (Monad m, MonadCatch m, MonadIO m, Ord g)
   => Maybe Env
-  -> GitPlatformAPIs g a b m e
+  -> GitPlatformAPIs g a b d m e
   -> (i -> T.Text)
   -> T.Text
   -> T.Text
@@ -326,8 +326,8 @@ getEcologyReport mEnv apis renderCIType ecologyBucket' ecologyStateObject' param
 -- list and projects that are found that are not in the list of ecology projects are in the
 -- `ecologyGitReportUnmanaged` list
 gitReport
-  :: forall a b c e g i m. (Monad m, Ord g)
-  => GitPlatformAPIs g a b m e
+  :: forall a b c d e g i m. (Monad m, Ord g)
+  => GitPlatformAPIs g a b d m e
   -> [EcologyProject g i a b c]
   -> EitherT (EcologyReportError e) m (EcologyGitReport g i a b c)
 gitReport apis projects =
