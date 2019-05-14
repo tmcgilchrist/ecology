@@ -348,7 +348,7 @@ createRepo apis ciApis customEnv templateHistory params templates p =
 
               pushNewRepoCommand :: ShellCommand
               pushNewRepoCommand =
-                gitCmd (RawArg <$> ["push", authedUrl, "master"])
+                gitCmd (RawArg <$> ["push", "-q",  authedUrl, "master"])
 
               gitAddCommand :: ShellCommand
               gitAddCommand =
