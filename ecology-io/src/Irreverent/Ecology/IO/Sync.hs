@@ -543,7 +543,7 @@ ecologySync gitAPIs ciAPIs imAPI hooks customEnv templateHistory ecologyBucket' 
        firstEitherT EcologySyncCIError $ ciParameterUpdate (selectCIAPI ciAPIs ciType') nm changes
 
     -- END Perform Updates
-    logText "Storing the new digests"
+    logText [text|"Storing the new digests $ecologyBucket' $ecologyStateObject'"|]
     writeDigestStore env ecologyBucket ecologyStateObject $ combineHashes newHashes newCIHashes
     logText "Sending notifications..."
     firstEitherT EcologySyncIMError . ipSyncReport imAPI $ newRepos
