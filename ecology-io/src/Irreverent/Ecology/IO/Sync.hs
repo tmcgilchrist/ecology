@@ -342,13 +342,9 @@ createRepo apis ciApis customEnv templateHistory params templates p =
                 (ecologyProjectType p)
                 (ciEnvironmentVars . ci $ p)
 
-              -- TODO want this to be for github personal token
-              -- git push -q https://${GITHUB_PERSONAL_TOKEN}@github.com/<user>/<repo>.git master
-              authedUrl = T.replace "git:" ("https://" <> getAuth api <> "@") (gitRepoGiUrl newRepo)
-
               pushNewRepoCommand :: ShellCommand
               pushNewRepoCommand =
-                gitCmd (RawArg <$> ["push", "-q",  authedUrl, "master"])
+                gitCmd (RawArg <$> ["push", "-q",  (gitRepoGiUrl newRepo), "master"])
 
               gitAddCommand :: ShellCommand
               gitAddCommand =
@@ -370,7 +366,6 @@ createRepo apis ciApis customEnv templateHistory params templates p =
                 KeepTemplateHistory -> cloneTemplateWithHistory template
                 RemoveTemplateHistory -> cloneTemplateWithoutHistory fp template
               mapEitherT (withCwd (verifiedDirPath fp <> "/new-repo")) $ do
-                logText [text|Bootstrapping template authedUrl:"$authedUrl" ...|]
                 lift $ bootstrapTemplate customEnv p
                 logText [text|Setup initial CI repo config ...|]
                 changes <- mapEitherT lift . firstEitherT EcologySyncCIError $ initialCIInRepoConfig ciApi (verifiedDirPath fp <> "/new-repo") params newCIInfo

@@ -26,10 +26,10 @@ newtype GitPlatformAPIs g a b m e = GitPlatformAPIs {
 data GitPlatformAPI a b m e = GitPlatformAPI {
     getOrgRepos   :: EitherT e m [GitRepository]
   , createNewRepo :: NewGitRepository a b -> EitherT e m GitRepository
-  , getAuth       :: T.Text
   }
 
 instance (Functor m) => Functor (GitPlatformAPI a b m) where
 --fmap :: (a -> b) -> f a -> f b
-  fmap f (GitPlatformAPI gor cnr auth) =
-    GitPlatformAPI (firstEitherT f gor) (firstEitherT f . cnr) auth
+  fmap f (
+    GitPlatformAPI gor cnr) =
+    GitPlatformAPI (firstEitherT f gor) (firstEitherT f . cnr)
